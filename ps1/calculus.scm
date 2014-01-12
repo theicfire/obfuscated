@@ -46,18 +46,40 @@
 "Problem 3: Integrating with pieces of any shape"
 
 (define (rectangle func x1 x2)
-    'your-code-here)
+    (* (func x1) (- x2 x1)))
+
+(define (rectangle-right func x1 x2)
+    (* (func x2) (- x2 x1)))
 
 (define (trapezoid func x1 x2)
-    'your-code-here)
+  (+ 
+    (rectangle func x1 x2)
+    (/ 
+      (rectangle-right func x1 x2)
+      2)))
 
+; (define (integral-with piece func num-steps x1 x2)
+;     'your-code-here)
 (define (integral-with piece func num-steps x1 x2)
-    'your-code-here)
+  (integral-with-iter piece func num-steps x1 x2 0))
+
+(define (integral-with-iter piece func num-steps x1 x2 cur)
+  (if (= num-steps 0)
+    cur
+    (integral-with-iter
+      piece
+      func
+      (- num-steps 1) 
+      (+ x1 (/ (- x2 x1) num-steps))
+      x2
+      (+ cur (piece func x1 (+ x1 (/ (- x2 x1) num-steps)))))))
 
 ;; Write your own test cases.  Start with checking that calling
 ;; (integral-with rectangle ...) is the same as calling (integral ...)
 ;; Then check that (integral-with trapezoid ...) produces better answers
 ;; for a given num-steps than the same (integral-with rectangle ...)
+(* 1.0 (integral-with rectangle bitf 50 3 6)) ;approach 1200, this step is 1171
+(* 1.0 (integral-with trapezoid bitf 50 3 6)) ;approach 1200, this step is 1171
 
 
 "Problem 4: Better approximation of pi"
