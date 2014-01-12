@@ -103,7 +103,10 @@
 "Problem 5: Derivative of a variable"
 
 (define (deriv-variable var wrt)
-    'your-code-here)
+  (if (eq? var wrt) var 0))
+
+(deriv-variable 'x 'x)
+(deriv-variable 'y 'x)
 
 
 "Problem 6: Calling the right function"
