@@ -113,8 +113,13 @@
 
 (define (derivative expr wrt)
     (cond
-        ; your code here
+      ((number? expr) (deriv-constant expr wrt))
+      ((symbol? expr) (deriv-variable expr wrt))
         (else (error "Don't know how to differentiate" expr))))
+
+(derivative 3 'x)
+(derivative 'x 'x)
+; (derivative * 'x) ; should create an error
 
 
 "Problem 7: Derivative of a sum"
