@@ -103,7 +103,7 @@
 "Problem 5: Derivative of a variable"
 
 (define (deriv-variable var wrt)
-  (if (eq? var wrt) var 0))
+  (if (eq? var wrt) 1 0))
 
 (deriv-variable 'x 'x)
 (deriv-variable 'y 'x)
@@ -123,10 +123,20 @@
 
 
 "Problem 7: Derivative of a sum"
+(define (isadd? expr)
+  (and (list? expr) (eq? '+ (car expr))))
+(define (derivative2 expr wrt)
+    (cond
+      ((number? expr) (deriv-constant expr wrt))
+      ((symbol? expr) (deriv-variable expr wrt))
+      ((isadd? expr)  (deriv-sum expr wrt))
+        (else (error "Don't know how to differentiate" expr))))
+
 
 (define (deriv-sum expr wrt)
-    'your-code-here)
+  (list '+ (derivative2 (cadr expr) wrt) (derivative2 (caddr expr) wrt)))
 
+(derivative2 '(+ x 2) 'x)
 
 "Problem 8: Derivative of a product"
 
