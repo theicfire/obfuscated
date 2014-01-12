@@ -55,7 +55,7 @@
   (+ 
     (rectangle func x1 x2)
     (/ 
-      (rectangle-right func x1 x2)
+      (- (rectangle-right func x1 x2) (rectangle func x1 x2))
       2)))
 
 ; (define (integral-with piece func num-steps x1 x2)
@@ -85,7 +85,10 @@
 "Problem 4: Better approximation of pi"
 
 (define (better-pi num-steps)
-    'your-code-here)
+  (* 4 (integral-with trapezoid (lambda (x) (sqrt (- 1 (* x x)))) num-steps 0 1)))
+(better-pi 1)   ;; Should be 4
+(better-pi 2)   ;; Hopefully lower than 4
+(better-pi 600) ;; Right to the first two decimal places?
 
 ;; How many digits does (better-pi 600) get correct, compared to
 ;; the earlier (approx-pi 600) ?
