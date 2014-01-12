@@ -111,10 +111,16 @@
 
 "Problem 6: Calling the right function"
 
+(define (isadd? expr)
+  (and (list? expr) (eq? '+ (car expr))))
+(define (ismul? expr)
+  (and (list? expr) (eq? '* (car expr))))
 (define (derivative expr wrt)
     (cond
       ((number? expr) (deriv-constant expr wrt))
       ((symbol? expr) (deriv-variable expr wrt))
+      ((isadd? expr)  (deriv-sum expr wrt))
+      ((ismul? expr)  (deriv-product expr wrt))
         (else (error "Don't know how to differentiate" expr))))
 
 (derivative 3 'x)
@@ -123,27 +129,28 @@
 
 
 "Problem 7: Derivative of a sum"
-(define (isadd? expr)
-  (and (list? expr) (eq? '+ (car expr))))
-(define (derivative2 expr wrt)
-    (cond
-      ((number? expr) (deriv-constant expr wrt))
-      ((symbol? expr) (deriv-variable expr wrt))
-      ((isadd? expr)  (deriv-sum expr wrt))
-        (else (error "Don't know how to differentiate" expr))))
 
 
 (define (deriv-sum expr wrt)
-  (list '+ (derivative2 (cadr expr) wrt) (derivative2 (caddr expr) wrt)))
+  (list '+ (derivative (cadr expr) wrt) (derivative (caddr expr) wrt)))
 
-(derivative2 '(+ x 2) 'x)
+(derivative '(+ x 2) 'x)
 
 "Problem 8: Derivative of a product"
 
 (define (deriv-product expr wrt)
-    'your-code-here)
+  (list '+
+    (list '* 
+      (cadr expr)
+      (derivative (caddr expr) wrt))
+    (list '*
+      (caddr expr)
+      (derivative (cadr expr) wrt))))
+
+(derivative '(* x 3) 'x) ; 
 
 
 "Problem 9: Additional testing"
 
 ; Additional test cases for 'derivative' go here.
+(derivative '(* (+ x 1) 3) 'x) ; 3
