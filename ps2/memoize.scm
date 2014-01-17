@@ -123,6 +123,17 @@
 "Problem 4"
 
 ;; memoize
+(define (memoize fn)
+  (let ((table (make-table)))
+    (lambda (n)
+      (cond
+        ((table-has-key? table n) (table-get table n))
+        (else (let ((ans (fn n))))
+                (table-put! table n ans)
+                ans)))))
+
+(set! fib (memoize fib))
+(fib 8)
 
 "Problem 5 (optional)"
 
