@@ -1,0 +1,14 @@
+1.
+What I used for key equality:
+I used equal?, because I figured that strings might be keys, which would require this.
+
+2.
+The second example doesn't correctly call the record the number of times fib is called because the recursive call calls fib, and not mon-fib which increments the counter. So the counter is only incremented on the first call, and not the recursive calls.
+
+3.
+; (entry 30 2692537)
+; (entry 20 21891)
+
+4.
+Did it; fib 8 now only calls fib 9 times.
+
