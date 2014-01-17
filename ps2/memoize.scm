@@ -119,6 +119,8 @@
 (make-num-calls-table fib 30)
 (fib 3)
 (fib 'how-many-calls?)
+; (entry 30 2692537)
+; (entry 20 21891)
 
 "Problem 4"
 
