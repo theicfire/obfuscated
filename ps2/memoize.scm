@@ -128,12 +128,14 @@
     (lambda (n)
       (cond
         ((table-has-key? table n) (table-get table n))
-        (else (let ((ans (fn n))))
+        (else (let ((ans (fn n)))
                 (table-put! table n ans)
-                ans)))))
+                ans))))))
 
 (set! fib (memoize fib))
+(fib 'reset-count)
 (fib 8)
+(fib 'how-many-calls?)
 
 "Problem 5 (optional)"
 
