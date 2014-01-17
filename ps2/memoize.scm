@@ -86,6 +86,18 @@
       (+ (fib (- n 1)) (fib (- n 2)))))
 
 ;; make-monitored
+"check make monitored"
+(define (make-monitored fn)
+  (let ((count 0))
+    (lambda (n)
+      (cond 
+        ((eq? n 'how-many-calls?) count)
+        ((eq? n 'reset-count) (set! count 0))
+        (else (begin
+          (set! count (+ count 1))
+          (fn n)))))))
+
+
 
 "Problem 3"
 
