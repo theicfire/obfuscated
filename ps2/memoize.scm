@@ -102,6 +102,23 @@
 "Problem 3"
 
 ;; make-num-calls-table
+(define (make-num-calls-table fn max)
+  (let ((table (make-table)))
+    (define (rec current-it)
+      (if (<= current-it max)
+        (begin
+          (fib 'reset-count)
+          (fib current-it)
+          (table-put! table current-it (fib 'how-many-calls?))
+          (rec (+ current-it 1)))))
+      ; do stuff
+    (rec 1)
+    table))
+
+(set! fib (make-monitored fib))
+(make-num-calls-table fib 30)
+(fib 3)
+(fib 'how-many-calls?)
 
 "Problem 4"
 
