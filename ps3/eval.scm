@@ -1,4 +1,4 @@
-#lang racket
+; #lang racket
 ;;
 ;; eval.scm - 6.037
 ;;
@@ -344,7 +344,15 @@
         (list '= =)
         (list 'display display)
         (list 'not not)
-        ; ... more primitives
+        (list '* *)
+        (list 'load load)
+        (list '/ /)
+        (list 'list list)
+        (list 'cadr cadr)
+        (list 'cddr cddr)
+        (list 'newline newline)
+        (list 'printf printf)
+        (list 'length length)
         ))
 
 (define (primitive-procedure-names) (mmap car (primitive-procedures)))
@@ -413,3 +421,11 @@
   ;; Update the meval-depth variable inside the environment we're simulating
   (set-variable-value! 'meval-depth (+ meval-depth 1) the-global-environment)
   'loaded)
+
+
+
+
+;; TESTING
+(driver-loop)
+
+(load "test-eval.scm")
