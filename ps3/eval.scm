@@ -76,6 +76,10 @@
 (define (and? exp) (tagged-list? exp 'and))
 (define (and-clauses exp) (cdr exp))
 (define (make-and seq) (cons 'and seq))
+(define (until? exp) (tagged-list? exp 'until))
+(define (until-clauses exp) (cdr exp))
+; (define (make-until seq) (cons 'until seq))
+
 (define (begin-actions begin-exp) (cdr begin-exp))
 (define (last-exp? seq) (null? (cdr seq)))
 (define (first-exp seq) (car seq))
@@ -109,6 +113,7 @@
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
         ((and? exp) (m-eval (and->if exp) env))
+        ((until? exp) (m-eval (until->if exp) env))
         ((definition? exp) (eval-definition exp env))
         ((if? exp) (eval-if exp env))
         ((lambda? exp)
@@ -169,6 +174,23 @@
         ;   (display "and eval first")
         ;   #t)
         #f))))
+
+; (define (until->if exp)
+;   (make-let '() 
+;     (make-define '(loop)
+;       (make-if test
+;         #t
+;         (make-begin
+;           (cons (until-expressions exp)
+;             '(loop)))))
+;     '(loop)))
+(define (until->if exp)
+  (display "in here")
+  (make-let '()
+    (list (make-begin (list
+      (make-define '(loop) 8)
+      '(loop))))))
+
 
 (define (let->application expr)
   (let ((names (let-bound-variables expr))

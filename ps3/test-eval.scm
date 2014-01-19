@@ -3,7 +3,7 @@
   (display (list one two))
   (if (equal? one two)
     (display 'pass)
-    (display 'error))
+    (display 'fail))
   (newline))
 
 (define (test)
@@ -28,6 +28,11 @@
   (test-equal? #t (and #t #t #t))
   (test-equal? #f (and #t #f))
   (test-equal? #f (and #t #t #f))
+
+  ; Testing Until
+  (display (until (> a 7)
+    (incr)))
+  (test-equal? 8 a)
 
   ; Printing tests
   (newline)
