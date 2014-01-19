@@ -29,9 +29,13 @@
   (test-equal? #f (and #t #f))
   (test-equal? #f (and #t #t #f))
 
+
   ; Testing Until
-  (display (until (> a 7)
-    (incr)))
+  (define (incr2) 
+      (set! a (+ a 1))
+      #f)
+  (until (> a 7)
+    (incr2))
   (test-equal? 8 a)
 
   ; Printing tests

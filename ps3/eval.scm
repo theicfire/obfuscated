@@ -77,8 +77,8 @@
 (define (and-clauses exp) (cdr exp))
 (define (make-and seq) (cons 'and seq))
 (define (until? exp) (tagged-list? exp 'until))
-(define (until-clauses exp) (cdr exp))
-; (define (make-until seq) (cons 'until seq))
+(define (until-test exp) (cadr exp))
+(define (until-body exp) (cddr exp))
 
 (define (begin-actions begin-exp) (cdr begin-exp))
 (define (last-exp? seq) (null? (cdr seq)))
@@ -175,20 +175,19 @@
         ;   #t)
         #f))))
 
-; (define (until->if exp)
-;   (make-let '() 
-;     (make-define '(loop)
-;       (make-if test
-;         #t
-;         (make-begin
-;           (cons (until-expressions exp)
-;             '(loop)))))
-;     '(loop)))
+; from http://stackoverflow.com/questions/3172768/adding-an-element-to-list-in-scheme
+(define (extend l . xs)
+  (if (null? l) 
+      xs
+      (cons (car l) (apply extend (cdr l) xs))))
+
 (define (until->if exp)
-  (display "in here")
   (make-let '()
     (list (make-begin (list
-      (make-define '(loop) 8)
+      (make-define '(loop)
+        (make-if (until-test exp)
+          #t
+          (make-begin (extend (until-body exp) '(loop)))))
       '(loop))))))
 
 
