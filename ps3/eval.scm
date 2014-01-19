@@ -73,6 +73,9 @@
   (cons 'let (cons bindings body)))
 
 (define (begin? exp) (tagged-list? exp 'begin))
+(define (and? exp) (tagged-list? exp 'and))
+(define (and-clauses exp) (cdr exp))
+(define (make-and seq) (cons 'and seq))
 (define (begin-actions begin-exp) (cdr begin-exp))
 (define (last-exp? seq) (null? (cdr seq)))
 (define (first-exp seq) (car seq))
@@ -99,10 +102,13 @@
 ;;
 
 (define (m-eval exp env)
+  ; (display (list "exp request" exp))
+  ; (define exp 2)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
+        ((and? exp) (m-eval (and->if exp) env))
         ((definition? exp) (eval-definition exp env))
         ((if? exp) (eval-if exp env))
         ((lambda? exp)
@@ -152,6 +158,17 @@
   (define-variable! (definition-variable exp)
                     (m-eval (definition-value exp) env)
                     env))
+
+(define (and->if exp)
+  (let ((clauses (and-clauses exp)))
+    (if (null? clauses)
+      #t
+      (make-if (first-cond-clause clauses)
+        (make-and (rest-cond-clauses clauses))
+        ; (begin
+        ;   (display "and eval first")
+        ;   #t)
+        #f))))
 
 (define (let->application expr)
   (let ((names (let-bound-variables expr))
@@ -353,6 +370,7 @@
         (list 'newline newline)
         (list 'printf printf)
         (list 'length length)
+        (list 'equal? equal?)
         ))
 
 (define (primitive-procedure-names) (mmap car (primitive-procedures)))
@@ -428,4 +446,11 @@
 ;; TESTING
 (driver-loop)
 
-(load "test-eval.scm")
+
+; (load "test-eval.scm")
+
+; Q1
+; Done in (define (primitive-procedures)
+
+; Q2
+; And is special because it should not evaluate any arguments following an argument that evaluates to false.
