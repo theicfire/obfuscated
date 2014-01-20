@@ -33,6 +33,7 @@
 
 (define (variable? exp) (symbol? exp))
 (define (assignment? exp) (tagged-list? exp 'set!))
+(define (unset? exp) (tagged-list? exp 'unset!))
 (define (assignment-variable exp) (cadr exp))
 (define (assignment-value exp) (caddr exp))
 (define (make-assignment var expr)
@@ -114,6 +115,7 @@
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
+        ((unset? exp) (eval-unset exp env))
         ((procedure-env? exp) (eval-procedure-env exp env))
         ((and? exp) (m-eval (and->if exp) env))
         ((until? exp) (m-eval (until->if exp) env))
@@ -160,6 +162,10 @@
 (define (eval-assignment exp env)
   (set-variable-value! (assignment-variable exp)
                        (m-eval (assignment-value exp) env)
+                       env))
+
+(define (eval-unset exp env)
+  (unset-variable-value! (assignment-variable exp)
                        env))
 
 (define (eval-definition exp env)
@@ -361,10 +367,27 @@
         (binding-value binding)
         (error "Unbound variable -- LOOKUP" var))))
 
+(define (add-binding-value! binding val)
+  (if (binding? binding)
+      (set-cdr! (cdr binding) (cons val (cddr binding)))
+      (error "Not a binding: " binding)))
+
+(define (remove-binding-value! binding)
+  (if (binding? binding)
+      (if (<= 4 (length binding))
+        (set-cdr! (cdr binding) (cdddr binding)))
+      (error "Not a binding: " binding)))
+
 (define (set-variable-value! var val env)
   (let ((binding (find-in-environment var env)))
     (if binding
-        (set-binding-value! binding val)
+        (add-binding-value! binding val)
+        (error "Unbound variable -- SET" var))))
+
+(define (unset-variable-value! var env)
+  (let ((binding (find-in-environment var env)))
+    (if binding
+        (remove-binding-value! binding)
         (error "Unbound variable -- SET" var))))
 
 (define (define-variable! var val env)
@@ -501,75 +524,3 @@
 
 
 
-; ===RUNNING INSTRUCTIONS===
-  ; Tests:
-    ; $ cat test-eval.scm | rlwrap racket -f eval.scm -i
-  ; Metacircular:
-    ; $ racket -f eval.scm -i
-    ; > (load-meval-defs)
-    ; > (driver-loop)
-    ; > (driver-loop)
-
-; ===QUESTION ANSWERS===
-; Q1
-; Done in (define (primitive-procedures)
-
-; Q2
-; And is special because it should not evaluate any arguments following an argument that evaluates to false.
-
-; Q5
-
-
-; Q6
-; Timing: 0. 8. 732. Full output below.
-; 
-; (define (fib n)
-;   (if (< n 2)
-;       n
-;       (+ (fib (- n 1)) (fib (- n 2)))))
-; > (time (fib 8))
-; cpu time: 0 real time: 1 gc time: 0
-; 21
-; > (load-meval-defs)
-; loaded
-; > (driver-loop)
-
-
-; ;;; M-Eval input level 1
-; (define (fib n)
-;   (if (< n 2)
-;       n
-;       (+ (fib (- n 1)) (fib (- n 2)))))
-
-; ;;; M-Eval value:
-; #<void>
-
-
-; ;;; M-Eval input level 1
-; (time (fib 8))
-; cpu time: 8 real time: 9 gc time: 0
-
-; ;;; M-Eval value:
-; 21
-
-
-; ;;; M-Eval input level 1
-; (driver-loop)
-
-
-; ;;; M-Eval input level 2
-; (define (fib n)
-;   (if (< n 2)
-;       n
-;       (+ (fib (- n 1)) (fib (- n 2)))))
-
-; ;;; M-Eval value:
-; #<void>
-
-
-; ;;; M-Eval input level 2
-; (time (fib 8))
-; cpu time: 732 real time: 733 gc time: 8
-
-; ;;; M-Eval value:
-; 21

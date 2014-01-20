@@ -40,6 +40,25 @@
     (incr2))
   (test-equal? 8 a)
 
+  ; Testing unset!
+  (define x 5)
+  (set! x 10)
+  (set! x 11)
+  (set! x 12)
+  (test-equal? x 12)
+  (unset! x)
+  (test-equal? x 11)
+  (unset! x)
+  (test-equal? x 10)
+  (unset! x)
+  (test-equal? x 5)
+  (unset! x)
+  (test-equal? x 5)
+
+  (define x 15)
+  (unset! x)
+  (test-equal? x 15)
+
 
   ; Testing procedure-env, env-value
   (define (make-counter)
@@ -74,13 +93,10 @@
   (define c (fn3))
   (test-equal? '(fn3-inner) (env-variables (env-parent (env-parent (procedure-env c)))))
 
-  ; (display (list
-  ;   "next"
-  ;   (env-variables (env-parent (env-parent (procedure-env c))))))
-
   ; Printing tests
   (newline)
   (printf "new line above")
+
   )
 
 (test)
