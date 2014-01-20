@@ -81,9 +81,6 @@
 (define (until-body exp) (cddr exp))
 (define (procedure-env? exp) (tagged-list? exp 'procedure-env))
 (define (procedure-env-proc exp) (cadr exp))
-(define (env-value? exp) (tagged-list? exp 'env-value))
-(define (env-value-symbol exp) (cadr exp))
-(define (env-value-env exp) (caddr exp))
 
 (define (begin-actions begin-exp) (cdr begin-exp))
 (define (last-exp? seq) (null? (cdr seq)))
@@ -118,7 +115,6 @@
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
         ((procedure-env? exp) (eval-procedure-env exp env))
-        ((env-value? exp) (eval-env-value exp env))
         ((and? exp) (m-eval (and->if exp) env))
         ((until? exp) (m-eval (until->if exp) env))
         ((definition? exp) (eval-definition exp env))
@@ -175,12 +171,7 @@
   (procedure-environment
     (binding-value
       (find-in-environment (procedure-env-proc exp) env))))
-
-(define (eval-env-value exp env)
-  (let 
-    ((var (m-eval (env-value-symbol exp) env))
-     (env2 (m-eval (env-value-env exp) env)))
-    (binding-value (find-in-environment  var env2))))
+; TODO current-env
 
 (define (and->if exp)
   (let ((clauses (and-clauses exp)))
@@ -381,6 +372,8 @@
            (make-binding var val)
            frame)))))
 
+(define (env-value var env)
+  (binding-value (find-in-environment var env)))
 ; primitives procedures - hooks to underlying Scheme procs
 (define (make-primitive-procedure implementation)
   (list 'primitive implementation))
@@ -409,6 +402,7 @@
         (list 'make-string make-string)
         (list 'cadr cadr)
         (list 'cddr cddr)
+        (list 'env-value env-value)
         (list 'newline newline)
         (list 'printf printf)
         (list 'length length)
@@ -500,3 +494,6 @@
 
 ; Q2
 ; And is special because it should not evaluate any arguments following an argument that evaluates to false.
+
+; Q5
+
