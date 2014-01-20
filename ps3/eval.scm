@@ -118,9 +118,7 @@
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
         ((procedure-env? exp) (eval-procedure-env exp env))
-        ((env-value? exp) (eval-env-value 
-          (m-eval (env-value-symbol exp) env)
-          (m-eval (env-value-env exp) env)))
+        ((env-value? exp) (eval-env-value exp env))
         ((and? exp) (m-eval (and->if exp) env))
         ((until? exp) (m-eval (until->if exp) env))
         ((definition? exp) (eval-definition exp env))
@@ -178,8 +176,11 @@
     (binding-value
       (find-in-environment (procedure-env-proc exp) env))))
 
-(define (eval-env-value var env)
-  (binding-value (find-in-environment  var env)))
+(define (eval-env-value exp env)
+  (let 
+    ((var (m-eval (env-value-symbol exp) env))
+     (env2 (m-eval (env-value-env exp) env)))
+    (binding-value (find-in-environment  var env2))))
 
 (define (and->if exp)
   (let ((clauses (and-clauses exp)))
