@@ -52,6 +52,18 @@
   (c)
   (test-equal? 2 (env-value 'n (procedure-env c)))
 
+
+  (define (fn2)
+    (let ((a 0) (b 1))
+      (lambda ()
+        (set! n (+ n 1))
+        n)))
+  (define c (fn2))
+  (test-equal? '(a b) (env-variables (procedure-env c)))
+  ; (display (list
+  ;   "next"
+  ;   (env-variables (procedure-env c))))
+
   ; Printing tests
   (newline)
   (printf "new line above")
