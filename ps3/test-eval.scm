@@ -31,12 +31,26 @@
 
 
   ; Testing Until
+  (define a 4)
   (define (incr2) 
       (set! a (+ a 1))
       #f)
   (until (> a 7)
     (incr2))
   (test-equal? 8 a)
+
+
+  ; Testing procedure-env, env-value
+  (define (make-counter)
+    (let ((n 0))
+      (lambda ()
+        (set! n (+ n 1))
+        n)))
+
+  (define c (make-counter))
+  (c)
+  (c)
+  (test-equal? 2 (env-value 'n (procedure-env c)))
 
   ; Printing tests
   (newline)

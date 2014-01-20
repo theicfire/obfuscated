@@ -79,6 +79,11 @@
 (define (until? exp) (tagged-list? exp 'until))
 (define (until-test exp) (cadr exp))
 (define (until-body exp) (cddr exp))
+(define (procedure-env? exp) (tagged-list? exp 'procedure-env))
+(define (procedure-env-proc exp) (cadr exp))
+(define (env-value? exp) (tagged-list? exp 'env-value))
+(define (env-value-symbol exp) (cadr exp))
+(define (env-value-env exp) (caddr exp))
 
 (define (begin-actions begin-exp) (cdr begin-exp))
 (define (last-exp? seq) (null? (cdr seq)))
@@ -106,12 +111,16 @@
 ;;
 
 (define (m-eval exp env)
-  ; (display (list "exp request" exp))
-  ; (define exp 2)
+  ; (display (list "REQUEST" exp))
+  ; (newline)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
+        ((procedure-env? exp) (eval-procedure-env exp env))
+        ((env-value? exp) (eval-env-value 
+          (m-eval (env-value-symbol exp) env)
+          (m-eval (env-value-env exp) env)))
         ((and? exp) (m-eval (and->if exp) env))
         ((until? exp) (m-eval (until->if exp) env))
         ((definition? exp) (eval-definition exp env))
@@ -163,6 +172,14 @@
   (define-variable! (definition-variable exp)
                     (m-eval (definition-value exp) env)
                     env))
+
+(define (eval-procedure-env exp env)
+  (procedure-environment
+    (binding-value
+      (find-in-environment (procedure-env-proc exp) env))))
+
+(define (eval-env-value var env)
+  (binding-value (find-in-environment  var env)))
 
 (define (and->if exp)
   (let ((clauses (and-clauses exp)))
@@ -386,6 +403,9 @@
         (list 'load load)
         (list '/ /)
         (list 'list list)
+        (list 'list? list?)
+        (list 'string-append string-append)
+        (list 'make-string make-string)
         (list 'cadr cadr)
         (list 'cddr cddr)
         (list 'newline newline)
@@ -465,6 +485,10 @@
 
 
 ;; TESTING
+
+
+
+
 (driver-loop)
 
 
