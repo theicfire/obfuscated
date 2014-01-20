@@ -269,6 +269,10 @@
   (if (binding? binding)
       (third binding)
       (error "Not a binding: " binding)))
+(define (binding-value-noerror binding)
+  (if (binding? binding)
+      (third binding)
+      #f))
 (define (set-binding-value! binding val)
   (if (binding? binding)
       (set-car! (cddr binding) val)
@@ -373,7 +377,7 @@
            frame)))))
 
 (define (env-value var env)
-  (binding-value (find-in-environment var env)))
+  (binding-value-noerror (find-in-environment var env)))
 
 (define (env-variables env)
   (frame-variables (environment-first-frame env)))

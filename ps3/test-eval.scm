@@ -51,6 +51,7 @@
   (c)
   (c)
   (test-equal? 2 (env-value 'n (procedure-env c)))
+  (test-equal? #f (env-value 'x (procedure-env c)))
 
 
   (define (fn2)
@@ -71,7 +72,7 @@
     (fn3-inner))
   (define c (fn3))
   (test-equal? '(fn3-inner) (env-variables (env-parent (env-parent (procedure-env c)))))
-  
+
   ; (display (list
   ;   "next"
   ;   (env-variables (env-parent (env-parent (procedure-env c))))))
