@@ -392,6 +392,16 @@
 (define (primitive-procedures)
   (list (list 'car car)
         (list 'cdr cdr)
+        (list 'caddr caddr)
+        (list 'caadr caadr)
+        (list 'cdadr cdadr)
+        (list 'cadddr cadddr)
+        (list 'symbol? symbol?)
+        (list 'pair? pair?)
+        (list 'eq? eq?)
+        (list 'number? number?)
+        (list 'string? string?)
+        (list 'boolean? boolean?)
         (list 'cons cons)
         (list 'set-car! set-car!)
         (list 'set-cdr! set-cdr!)
@@ -456,7 +466,7 @@
         (list 'read-line        read-line)
         (list 'open-input-file  open-input-file)
         (list 'this-expression-file-name
-                    (lambda () (this-expression-file-name)))
+                    (lambda () "eval.scm"))
         (list 'pretty-display   pretty-display)
         (list 'error            error)
         (list 'apply            m-apply))) ;; <-- This line is somewhat interesting
@@ -494,9 +504,10 @@
 ;; TESTING
 
 
+; (load-meval-defs)
 
 
-(driver-loop)
+; (driver-loop)
 
 
 ; (load "test-eval.scm")
@@ -509,3 +520,57 @@
 
 ; Q5
 
+
+; Q6
+; Timing: 0. 8. 732. Full output below.
+; 
+; (define (fib n)
+;   (if (< n 2)
+;       n
+;       (+ (fib (- n 1)) (fib (- n 2)))))
+; > (time (fib 8))
+; cpu time: 0 real time: 1 gc time: 0
+; 21
+; > (load-meval-defs)
+; loaded
+; > (driver-loop)
+
+
+; ;;; M-Eval input level 1
+; (define (fib n)
+;   (if (< n 2)
+;       n
+;       (+ (fib (- n 1)) (fib (- n 2)))))
+
+; ;;; M-Eval value:
+; #<void>
+
+
+; ;;; M-Eval input level 1
+; (time (fib 8))
+; cpu time: 8 real time: 9 gc time: 0
+
+; ;;; M-Eval value:
+; 21
+
+
+; ;;; M-Eval input level 1
+; (driver-loop)
+
+
+; ;;; M-Eval input level 2
+; (define (fib n)
+;   (if (< n 2)
+;       n
+;       (+ (fib (- n 1)) (fib (- n 2)))))
+
+; ;;; M-Eval value:
+; #<void>
+
+
+; ;;; M-Eval input level 2
+; (time (fib 8))
+; cpu time: 732 real time: 733 gc time: 8
+
+; ;;; M-Eval value:
+; 21
