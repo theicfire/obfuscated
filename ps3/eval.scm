@@ -501,17 +501,16 @@
 
 
 
-;; TESTING
+; ===RUNNING INSTRUCTIONS===
+  ; Tests:
+    ; $ cat test-eval.scm | rlwrap racket -f eval.scm -i
+  ; Metacircular:
+    ; $ racket -f eval.scm -i
+    ; > (load-meval-defs)
+    ; > (driver-loop)
+    ; > (driver-loop)
 
-
-; (load-meval-defs)
-
-
-; (driver-loop)
-
-
-; (load "test-eval.scm")
-
+; ===QUESTION ANSWERS===
 ; Q1
 ; Done in (define (primitive-procedures)
 
