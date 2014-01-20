@@ -377,6 +377,9 @@
 
 (define (env-variables env)
   (frame-variables (environment-first-frame env)))
+
+(define (env-parent env)
+  (enclosing-environment env))
 ; primitives procedures - hooks to underlying Scheme procs
 (define (make-primitive-procedure implementation)
   (list 'primitive implementation))
@@ -407,6 +410,7 @@
         (list 'cddr cddr)
         (list 'env-value env-value)
         (list 'env-variables env-variables)
+        (list 'env-parent env-parent)
         (list 'newline newline)
         (list 'printf printf)
         (list 'length length)

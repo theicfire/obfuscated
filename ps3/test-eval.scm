@@ -60,9 +60,21 @@
         n)))
   (define c (fn2))
   (test-equal? '(a b) (env-variables (procedure-env c)))
+
+
+  (define (fn3)
+    (define (fn3-inner)
+      (let ((a 0) (b 1))
+        (lambda ()
+          (set! n (+ n 1))
+          n)))
+    (fn3-inner))
+  (define c (fn3))
+  (test-equal? '(fn3-inner) (env-variables (env-parent (env-parent (procedure-env c)))))
+  
   ; (display (list
   ;   "next"
-  ;   (env-variables (procedure-env c))))
+  ;   (env-variables (env-parent (env-parent (procedure-env c))))))
 
   ; Printing tests
   (newline)
