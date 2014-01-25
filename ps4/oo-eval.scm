@@ -120,7 +120,7 @@
         ((make-class? exp) (eval-make-class exp env))
         ((application? exp)
          (oo-apply (oo-eval (operator exp) env)
-                (list-of-values (operands exp) env)))
+                   (list-of-values (operands exp) env)))
         (else (oo-error "Unknown expression type -- EVAL" exp))))
 
 (define (oo-apply procedure arguments)
@@ -128,10 +128,10 @@
          (apply-primitive-procedure procedure arguments))
         ((compound-procedure? procedure)
          (eval-sequence
-          (procedure-body procedure)
-          (extend-environment (make-frame (procedure-parameters procedure)  
-                                          arguments)
-                              (procedure-environment procedure))))
+           (procedure-body procedure)
+           (extend-environment (make-frame (procedure-parameters procedure)  
+                                           arguments)
+                               (procedure-environment procedure))))
         (else (oo-error "Unknown procedure type -- APPLY" procedure))))
 
 (define (list-of-values exps env)
@@ -186,9 +186,9 @@
       (cond ((last-pair? clauses)
              val)
             (val
-             (and-helper (cdr clauses)))
+              (and-helper (cdr clauses)))
             (else
-             #f))))
+              #f))))
   (if (last-pair? exp)
       #t
       (and-helper (and-clauses exp))))
@@ -202,9 +202,9 @@
       (cond ((last-pair? clauses)
              val)
             (val
-             val)
+              val)
             (else
-             (or-helper (cdr clauses))))))
+              (or-helper (cdr clauses))))))
   (if (last-pair? exp)
       #f
       (or-helper (or-clauses exp))))
@@ -236,12 +236,12 @@
     (cond ((eof-object? input)   'oo-eval-done)
           ((eq? input '**quit**) 'oo-eval-done)
           (else
-           (let ((output (oo-eval input the-global-environment)))
-             (if (not port)
-                 (begin
-                   (announce-output output-prompt)
-                   (pretty-display output)))
-             (repl port))))))
+            (let ((output (oo-eval input the-global-environment)))
+              (if (not port)
+                  (begin
+                    (announce-output output-prompt)
+                    (pretty-display output)))
+              (repl port))))))
 
 (define (prompt-for-input string)
   (newline) (newline) (display string) (newline))
@@ -302,8 +302,8 @@
           ((null? rest-vals)
            (oo-error "Too few args supplied" variables values))
           (else
-           (cons (make-binding (car rest-vars) (car rest-vals))
-                 (make-frame-bindings (cdr rest-vars) (cdr rest-vals))))))
+            (cons (make-binding (car rest-vars) (car rest-vals))
+                  (make-frame-bindings (cdr rest-vars) (cdr rest-vals))))))
   (make-frame-from-bindings (make-frame-bindings variables values)))
 
 (define (make-frame-from-bindings list-of-bindings)
@@ -385,8 +385,8 @@
       (if binding
           (set-binding-value! binding val)
           (add-binding-to-frame!
-           (make-binding var val)
-           frame)))))
+            (make-binding var val)
+            frame)))))
 
 ; primitive procedures - hooks to underlying Scheme procs
 (define (make-primitive-procedure implementation)
@@ -395,46 +395,46 @@
 (define (primitive-implementation proc) (cadr proc))
 (define (primitive-procedures)
   (list (list 'car car)
-	(list 'cadr cadr)
+        (list 'cadr cadr)
         (list 'cdr cdr)
-	(list 'first first)
-	(list 'second second)
-	(list 'third third)
-	(list 'fourth fourth)
-	(list 'fifth fifth)
-	(list 'rest cdr)
-  (list 'cons cons)
-  (list 'null? null?)
-  (list 'memq memq)
-	(list 'assq assq)
-
-  (list 'not not)
-  (list 'eq? eq?)
-  (list 'equal? equal?)
-  (list 'pair? pair?)
-  (list 'symbol-append
-        (lambda args
-          (string->symbol (apply string-append
-                                 (map symbol->string args)))))
-
-  (list '+ +)
-  (list '- -)
-  (list '* *)
-  (list '/ /)
-  (list '< <)
-  (list '> >)
-  (list '= =)
-  (list 'random random)
-  (list 'symbol-prefix? symbol-prefix?)
-
-  (list 'display display)
-  (list 'newline newline)
-
-  (list 'run-file run-file)
-  (list 'apply oo-apply)
-  (list 'new make-instance)
-
-  ))
+        (list 'first first)
+        (list 'second second)
+        (list 'third third)
+        (list 'fourth fourth)
+        (list 'fifth fifth)
+        (list 'rest cdr)
+        (list 'cons cons)
+        (list 'null? null?)
+        (list 'memq memq)
+        (list 'assq assq)
+        
+        (list 'not not)
+        (list 'eq? eq?)
+        (list 'equal? equal?)
+        (list 'pair? pair?)
+        (list 'symbol-append
+              (lambda args
+                (string->symbol (apply string-append
+                                       (map symbol->string args)))))
+        
+        (list '+ +)
+        (list '- -)
+        (list '* *)
+        (list '/ /)
+        (list '< <)
+        (list '> >)
+        (list '= =)
+        (list 'random random)
+        (list 'symbol-prefix? symbol-prefix?)
+        
+        (list 'display display)
+        (list 'newline newline)
+        
+        (list 'run-file run-file)
+        (list 'apply oo-apply)
+        (list 'new make-instance)
+        
+        ))
 
 (define (primitive-procedure-names) (map car (primitive-procedures)))
 
@@ -515,15 +515,15 @@
 ; Need to call the constructor if there is one
 (define (make-instance class . args)
   (let ((instance
-         (list 'instance
-               (cons (list ':class class)
-                     (map
-                      (lambda (x) (list x 'uninitialized))
-                      (invoke class 'GET-SLOTS))))))
-
+          (list 'instance
+                (cons (list ':class class)
+                      (map
+                        (lambda (x) (list x 'uninitialized))
+                        (invoke class 'GET-SLOTS))))))
+    
     (if (class-has-method? class 'CONSTRUCTOR)
         (method-call instance 'CONSTRUCTOR class args))
-
+    
     ; return the constructed instance
     instance))
 
@@ -544,38 +544,38 @@
 ; (CONSTRUCTOR), instantiation (GET-SLOTS), and method calls (FIND-METHOD).
 (define default-metaclass
   `(instance
-    ((:class <put-default-metaclass-here>)
-     (:name class)
-     (:parent-class #f)
-     (:slots (:name :parent-class :slots :methods))
-     (:methods
-      ((CONSTRUCTOR ,(lambda (self name parent slots methods)
-                       (write-slot! self ':name name)
-                       (write-slot! self ':parent-class parent)
-                       (write-slot! self ':slots slots)
-                       (write-slot! self ':methods methods)))
-       ;; Returns "method-info" see below
-       (FIND-METHOD ,(lambda (self methodname)
-		      (let ((my-method (assq methodname (read-slot self ':methods))))
-			(if my-method
-			    (make-method-info methodname (second my-method) (read-slot self ':parent-class))
-			    (if (read-slot self ':parent-class)
-				 (invoke (read-slot self ':parent-class) 'FIND-METHOD methodname)
-				 #f)))))
-
-       (GET-SLOTS ,(lambda (self)
-		     (append (read-slot self ':slots)
-			     (if (read-slot self ':parent-class)
-				 (invoke (read-slot self ':parent-class) 'GET-SLOTS)
-				 '()))))
-
-       ;; These are not needed to bootstrap, but enable some introspection
-       (GET-CLASS   ,(lambda (self) (read-slot self ':class)))
-       (GET-METHODS ,(lambda (self)
-		       (append (map car (read-slot self ':methods))
-			       (if (read-slot self ':parent-class)
-				   (invoke (read-slot self ':parent-class) 'GET-METHODS)
-				   '())))))))))
+     ((:class <put-default-metaclass-here>)
+      (:name class)
+      (:parent-class #f)
+      (:slots (:name :parent-class :slots :methods))
+      (:methods
+        ((CONSTRUCTOR ,(lambda (self name parent slots methods)
+                         (write-slot! self ':name name)
+                         (write-slot! self ':parent-class parent)
+                         (write-slot! self ':slots slots)
+                         (write-slot! self ':methods methods)))
+         ;; Returns "method-info" see below
+         (FIND-METHOD ,(lambda (self methodname)
+                         (let ((my-method (assq methodname (read-slot self ':methods))))
+                           (if my-method
+                               (make-method-info methodname (second my-method) (read-slot self ':parent-class))
+                               (if (read-slot self ':parent-class)
+                                   (invoke (read-slot self ':parent-class) 'FIND-METHOD methodname)
+                                   #f)))))
+         
+         (GET-SLOTS ,(lambda (self)
+                       (append (read-slot self ':slots)
+                               (if (read-slot self ':parent-class)
+                                   (invoke (read-slot self ':parent-class) 'GET-SLOTS)
+                                   '()))))
+         
+         ;; These are not needed to bootstrap, but enable some introspection
+         (GET-CLASS   ,(lambda (self) (read-slot self ':class)))
+         (GET-METHODS ,(lambda (self)
+                         (append (map car (read-slot self ':methods))
+                                 (if (read-slot self ':parent-class)
+                                     (invoke (read-slot self ':parent-class) 'GET-METHODS)
+                                     '())))))))))
 
 
 
@@ -586,20 +586,20 @@
 ;; oo-eval should call this to handle the make-class special form
 (define (eval-make-class exp env)  ;; PROBLEM 2
   (let (
-    (name (oo-eval (make-class-name exp) env))
-    (parent (oo-eval (make-class-parent exp) env))
-    (slots (make-class-slots exp))
-    (methods (eval-methods (make-class-methods exp) env)))
+        (name (oo-eval (make-class-name exp) env))
+        (parent (oo-eval (make-class-parent exp) env))
+        (slots (make-class-slots exp))
+        (methods (eval-methods (make-class-methods exp) env)))
     (newline)
-        (create-class name parent slots methods)))
+    (create-class name parent slots methods)))
 
 (define (eval-methods methods env)
   ; eval only the lambda of each pair
   (map 
     (lambda (method) 
-        (list 
-          (first method)
-          (oo-eval (second method) env)))
+      (list 
+        (first method)
+        (oo-eval (second method) env)))
     methods))
 
 
@@ -619,37 +619,37 @@
 (define (method-call instance method current-class args)
   (let ((info (find-class-method-info method current-class)))
     (if info
-	(apply-method instance info args)
-	(oo-error "No such method" method))))
+        (apply-method instance info args)
+        (oo-error "No such method" method))))
 
 
 ;; Apply a method procedure. Normally an oo-eval procedure, although can also be a normal underlying scheme procedure
 ;; in the case of the original default-metaclass definition
 (define (apply-method instance methodinfo args)
   (let ((proc (method-info-proc methodinfo))
-	(parent-class (method-info-parent-class methodinfo)))
+        (parent-class (method-info-parent-class methodinfo)))
     (if (procedure? proc)          ;; Detect procedure from underlying scheme
-	(apply proc instance args) ;; Kludge to make the default-metaclass' methods work and bootstrap us.
-	(let* ((proc-env  
-	        (procedure-environment proc)) ;; Normal case, method defined by user through oo-eval with make-class
-
-	       (args-env
-	        (extend-environment (make-frame (procedure-parameters proc) 
-                                                args)
-                                    proc-env))
-	       (selfsuper-env 
-                (extend-environment (make-frame '(self super)
-                                                (list instance (make-super instance parent-class)))
-                                    args-env)))
-	  (eval-sequence
-	   (procedure-body proc)
-	   selfsuper-env)))))
+        (apply proc instance args) ;; Kludge to make the default-metaclass' methods work and bootstrap us.
+        (let* ((proc-env  
+                 (procedure-environment proc)) ;; Normal case, method defined by user through oo-eval with make-class
+               
+               (args-env
+                 (extend-environment (make-frame (procedure-parameters proc) 
+                                                 args)
+                                     proc-env))
+               (selfsuper-env 
+                 (extend-environment (make-frame '(self super)
+                                                 (list instance (make-super instance parent-class)))
+                                     args-env)))
+          (eval-sequence
+            (procedure-body proc)
+            selfsuper-env)))))
 
 ; builds a procedure that starts a method search at parent, for "super"
 (define (make-super instance parent-class)
   (make-primitive-procedure
-   (lambda (method . args)
-     (method-call instance method parent-class args))))
+    (lambda (method . args)
+      (method-call instance method parent-class args))))
 
 ;; We want to let the metaclass' idea of method-searching define our behavior.
 ;; In order to call the FIND-METHOD method, we need some other way of getting at it.
@@ -658,11 +658,11 @@
 (define (find-class-method-info methodname class)
   (if (class? class)
       (let ((get-method-alist-entry (assq 'FIND-METHOD (read-slot (instance-class class) ':methods))))
-	(if get-method-alist-entry
-	    (apply-method class 
-			  (make-method-info 'FIND-METHOD (second get-method-alist-entry) (read-slot (instance-class class) ':parent-class))
-			  (list methodname))
-	    (oo-error "Metaclass does not define FIND-METHOD method; impossible to call methods")))
+        (if get-method-alist-entry
+            (apply-method class 
+                          (make-method-info 'FIND-METHOD (second get-method-alist-entry) (read-slot (instance-class class) ':parent-class))
+                          (list methodname))
+            (oo-error "Metaclass does not define FIND-METHOD method; impossible to call methods")))
       #f))
 
 ;; FIND-METHOD is supposed to return a "method-info" object
@@ -706,10 +706,10 @@
 
 ;; if inside
 (oo-eval
- '(define (run-game yourname)
+  '(define (run-game yourname)
     (run-file "oo-world.scm")
     (setup yourname))
- the-global-environment)
+  the-global-environment)
 
 
 ;; Load Alyssa's tests
