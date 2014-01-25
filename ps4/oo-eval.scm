@@ -403,37 +403,37 @@
 	(list 'fourth fourth)
 	(list 'fifth fifth)
 	(list 'rest cdr)
-        (list 'cons cons)
-        (list 'null? null?)
-        (list 'memq memq)
+  (list 'cons cons)
+  (list 'null? null?)
+  (list 'memq memq)
 	(list 'assq assq)
 
-        (list 'not not)
-        (list 'eq? eq?)
-        (list 'equal? equal?)
-        (list 'pair? pair?)
-        (list 'symbol-append
-              (lambda args
-                (string->symbol (apply string-append
-                                       (map symbol->string args)))))
+  (list 'not not)
+  (list 'eq? eq?)
+  (list 'equal? equal?)
+  (list 'pair? pair?)
+  (list 'symbol-append
+        (lambda args
+          (string->symbol (apply string-append
+                                 (map symbol->string args)))))
 
-        (list '+ +)
-        (list '- -)
-        (list '* *)
-        (list '/ /)
-        (list '< <)
-        (list '> >)
-        (list '= =)
-        (list 'random random)
-        (list 'symbol-prefix? symbol-prefix?)
+  (list '+ +)
+  (list '- -)
+  (list '* *)
+  (list '/ /)
+  (list '< <)
+  (list '> >)
+  (list '= =)
+  (list 'random random)
+  (list 'symbol-prefix? symbol-prefix?)
 
-        (list 'display display)
-        (list 'newline newline)
+  (list 'display display)
+  (list 'newline newline)
 
-        (list 'run-file run-file)
-        (list 'apply oo-apply)
+  (list 'run-file run-file)
+  (list 'apply oo-apply)
 
-        ))
+  ))
 
 (define (primitive-procedure-names) (map car (primitive-procedures)))
 
