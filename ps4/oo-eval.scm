@@ -93,6 +93,12 @@
 (define (make-application rator rands)
   (cons rator rands))
 
+(define (make-class? exp) (tagged-list? exp 'make-class))
+(define (make-class-name exp) (cadr exp))
+(define (make-class-parent exp) (caddr exp))
+(define (make-class-slots exp) (cadddr exp))
+(define (make-class-methods exp) (fifth exp))
+
 ;;
 ;; this section is the actual implementation of oo-eval
 ;;
@@ -111,6 +117,7 @@
         ((let? exp) (oo-eval (let->application exp) env))
         ((and? exp) (eval-and exp env))
         ((or? exp) (eval-or exp env))
+        ((make-class? exp) (eval-make-class exp env))
         ((application? exp)
          (oo-apply (oo-eval (operator exp) env)
                 (list-of-values (operands exp) env)))
@@ -577,7 +584,22 @@
 
 ;; oo-eval should call this to handle the make-class special form
 (define (eval-make-class exp env)  ;; PROBLEM 2
-  'something-involving-create-class?)
+  (let (
+    (name (oo-eval (make-class-name exp) env))
+    (parent (oo-eval (make-class-parent exp) env))
+    (slots (make-class-slots exp))
+    (methods (eval-methods (make-class-methods exp) env)))
+    (newline)
+        (create-class name parent slots methods)))
+
+(define (eval-methods methods env)
+  ; eval only the lambda of each pair
+  (map 
+    (lambda (method) 
+        (list 
+          (first method)
+          (oo-eval (second method) env)))
+    methods))
 
 
 ;; PROBLEM 4
