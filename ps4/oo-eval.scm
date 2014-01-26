@@ -500,8 +500,6 @@
 
 (define (instance-state inst)
   (second inst))
-(define (instance-slots inst)
-  (cdr (instance-state inst)))
 
 ; Given an object instance and slot name, find the slot's current value
 (define (read-slot instance varname)
@@ -658,13 +656,14 @@
                  (extend-environment (make-frame '(self super)
                                                  (list instance (make-super instance parent-class)))
                                      args-env)))
+          
           (eval-sequence
             (procedure-body proc)
             selfsuper-env)))))
 
 (define (get-shared-slots instance)
   (map (lambda (pair) (make-binding-shared pair))
-       (instance-slots instance)))
+       (instance-state instance)))
 
 ; builds a procedure that starts a method search at parent, for "super"
 (define (make-super instance parent-class)
