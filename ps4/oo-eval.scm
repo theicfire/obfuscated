@@ -575,6 +575,12 @@
                                (if (read-slot self ':parent-class)
                                    (invoke (read-slot self ':parent-class) 'GET-SLOTS)
                                    '()))))
+
+         (GET-TYPES ,(lambda (self)
+                       (cons (class-name self)
+                               (if (read-slot self ':parent-class)
+                                   (invoke (read-slot self ':parent-class) 'GET-TYPES)
+                                   '()))))
          
          ;; These are not needed to bootstrap, but enable some introspection
          (GET-CLASS   ,(lambda (self) (read-slot self ':class)))
