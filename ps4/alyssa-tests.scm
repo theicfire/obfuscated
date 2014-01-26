@@ -226,6 +226,21 @@
                      (verify-result "Method invocation failed." (obj 'METHOD2) 12)
                      (verify-result "Method invocation failed." (obj 'METHOD3) 17))))
 
+(define test-problem4-slot-read-super
+  (make-oo-eval-test "Problem 4: method invocation (slot reading and inheritance)"
+                   '((define base (make-class 'BASE #f (a b c) ((METHOD1 (lambda () a)))))
+                     (define sub  (make-class 'SUB  base (d e f) ((METHOD3 (lambda () a)))))
+                     ; (define sub2  (make-class 'SUB  base (a e f) ((METHOD3 (lambda () (set! a 1)) (METHOD4 (lambda () (a)))))))
+                     (define obj (new sub))
+                     ; (define obj2 (new sub2))
+                     (verify-result "Parent should work" (obj 'METHOD1) 'uninitialized)
+                     (verify-result "Child should be able to read parent's slots" (obj 'METHOD3) 'uninitialized))))
+                     ; child writes
+                     ; TODO fix below
+                     ; (obj 'METHOD3)
+                     ; (verify-result "Child's slot changed" (obj2 'METHOD4) 1)
+                     ; (verify-result "Parent's slot did not changed" (obj2 'METHOD1) 'uninitialized))))
+
 
 (define test-problem-5
   (make-oo-eval-test "Problem 5: GET-TYPES"

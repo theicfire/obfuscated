@@ -99,6 +99,10 @@
 (define (make-class-slots exp) (cadddr exp))
 (define (make-class-methods exp) (fifth exp))
 
+(define (lg . args)
+  (display (cons "LOG:" args))
+  (newline))
+
 ;;
 ;; this section is the actual implementation of oo-eval
 ;;
@@ -126,6 +130,8 @@
 (define (oo-apply procedure arguments)
   (cond ((primitive-procedure? procedure)
          (apply-primitive-procedure procedure arguments))
+        ((instance? procedure)
+         (oo-apply-instance procedure arguments))
         ((compound-procedure? procedure)
          (eval-sequence
            (procedure-body procedure)
@@ -494,6 +500,8 @@
 
 (define (instance-state inst)
   (second inst))
+(define (instance-slots inst)
+  (cdr (instance-state inst)))
 
 ; Given an object instance and slot name, find the slot's current value
 (define (read-slot instance varname)
@@ -555,6 +563,7 @@
                          (write-slot! self ':slots slots)
                          (write-slot! self ':methods methods)))
          ;; Returns "method-info" see below
+         ; goes up through classes so that it can return (make-method-info methodname methodbody parent-class)
          (FIND-METHOD ,(lambda (self methodname)
                          (let ((my-method (assq methodname (read-slot self ':methods))))
                            (if my-method
@@ -609,7 +618,11 @@
       (oo-error "Applications of instances must include a method name as the first argument. Instance:" instance)
       (let ((methodname (car arguments))
             (methodargs (cdr arguments)))
-        'BRRRRRRRRRAAAAAINS?)))
+      (method-call
+        instance
+        methodname
+        (instance-class instance)
+        methodargs))))
 
 ;; Call a method on an object (variable arguments form)
 (define (invoke instance method . args)
@@ -629,14 +642,18 @@
   (let ((proc (method-info-proc methodinfo))
         (parent-class (method-info-parent-class methodinfo)))
     (if (procedure? proc)          ;; Detect procedure from underlying scheme
-        (apply proc instance args) ;; Kludge to make the default-metaclass' methods work and bootstrap us.
+        (begin
+          (apply proc instance args)) ;; Kludge to make the default-metaclass' methods work and bootstrap us.
         (let* ((proc-env  
                  (procedure-environment proc)) ;; Normal case, method defined by user through oo-eval with make-class
-               
+
+               (slots-env
+                 (extend-environment (make-frame-from-bindings (get-shared-slots instance))
+                                     proc-env))
                (args-env
                  (extend-environment (make-frame (procedure-parameters proc) 
                                                  args)
-                                     proc-env))
+                                     slots-env))
                (selfsuper-env 
                  (extend-environment (make-frame '(self super)
                                                  (list instance (make-super instance parent-class)))
@@ -644,6 +661,10 @@
           (eval-sequence
             (procedure-body proc)
             selfsuper-env)))))
+
+(define (get-shared-slots instance)
+  (map (lambda (pair) (make-binding-shared pair))
+       (instance-slots instance)))
 
 ; builds a procedure that starts a method search at parent, for "super"
 (define (make-super instance parent-class)
