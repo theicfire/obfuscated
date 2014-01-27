@@ -4,6 +4,9 @@
 ;;;;;;;;;;
 ;; Bootstrapping the object system
 
+(define (lg . args)
+  (display (cons "LOG:" args))
+  (newline))
 (define (is-a type)
   (lambda (obj)
     (if (memq type ((obj 'GET-CLASS) 'GET-TYPES))
@@ -15,7 +18,8 @@
    'ROOT-CLASS
    #f
    ()
-   ((GET-CLASS (lambda () :class)))))
+   ((GET-CLASS (lambda () :class))
+    (SET-CLASS! (lambda (class) (set! :class class))))))
 
 
 ;;;;;;;;;;
@@ -187,3 +191,26 @@
   (for-each (lambda (s) (display s) (display " "))
             list-of-stuff)
   'MESSAGE-DISPLAYED)
+
+(define (make-mixin name methods)
+  (list 'mixin name methods))
+
+(define (mixin? exp) (tagged-list? exp 'mixin))
+(define (mixin-name exp) (second exp))
+(define (mixin-methods exp) (third exp))
+
+(define (instance-add-mixin! obj mixin)
+  (if (not (mixin? mixin))
+      (error "Mixin is not a mixin")
+      (let ((new-parent (make-class 
+                          (mixin-name mixin)
+                          (obj 'GET-CLASS)
+                          '()
+                          ())))
+        (add-methods new-parent (mixin-methods mixin))
+        (obj 'SET-CLASS! new-parent))))
+
+(define (add-methods class methods)
+  (if (not (null? methods))
+      (class 'ADD-METHOD! (first (first methods)) (second (first methods)))
+      (add-methods class (cdr methods))))

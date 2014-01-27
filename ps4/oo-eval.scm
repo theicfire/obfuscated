@@ -1,4 +1,4 @@
-#lang racket
+; #lang racket
 ;;
 ;; 6.037
 ;;
@@ -439,6 +439,7 @@
         (list 'run-file run-file)
         (list 'apply oo-apply)
         (list 'new make-instance)
+        (list 'tagged-list? tagged-list?)
         
         ))
 
@@ -584,6 +585,11 @@
          
          ;; These are not needed to bootstrap, but enable some introspection
          (GET-CLASS   ,(lambda (self) (read-slot self ':class)))
+         (SET-CLASS!   ,(lambda (self newname) (write-slot! self ':class newname)))
+         (ADD-METHOD! ,(lambda (self name method)
+                         (write-slot! self ':methods 
+                                      (cons (list name method)
+                                            (read-slot self ':methods)))))
          (GET-METHODS ,(lambda (self)
                          (append (map car (read-slot self ':methods))
                                  (if (read-slot self ':parent-class)

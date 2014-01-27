@@ -254,25 +254,107 @@
                      (verify-result "sicp is rootobject"  ((is-a 'ROOT-OBJECT) sicp) #t)
                      (verify-result "sicp is not yourmom" ((is-a 'YOUR-MOM) sicp) #f))))
 
-(define test-problem6-basic
-  (make-test "Problem 6: abstraction opacity: regression check"
-        (lambda (fail)
-          (let* ((base (create-class 'BASE #f '() '()))
-                (obj (make-instance base)))
-            (cond ((not (class? base)) (fail "class fails class? check"))
-                  ((not (instance? obj)) (fail "instance fails instance? check"))
-                  (else 'test-passed))))))
+; (define test-problem6-basic
+;   (make-test "Problem 6: abstraction opacity: regression check"
+;         (lambda (fail)
+;           (let* ((base (create-class 'BASE #f '() '()))
+;                 (obj (make-instance base)))
+;             (cond ((not (class? base)) (fail "class fails class? check"))
+;                   ((not (instance? obj)) (fail "instance fails instance? check"))
+;                   (else 'test-passed))))))
 
-(define test-problem6-oo-eval
-    (make-oo-eval-test "Problem 6: abstraction opacity in oo-eval [optional] LAST TEST"
-                   '((define base (make-class 'BASE #f () ((METHOD1 (lambda () 5)) (METHOD2 (lambda () 6)))))
-                     (define sub  (make-class 'SUB  base () ((METHOD3 (lambda () (+ (self 'METHOD2) (self 'METHOD1)))) (METHOD2 (lambda () (* 2 (super 'METHOD2)))))))
-                     (define obj (new sub))
-                     (cond ((pair? base) (fail "Representation of class leaked"))
-                           ((pair? sub)  (fail "Representation of sub class leaked"))
-                           ((pair? (sub 'GET-CLASS)) (fail "Representation of metaclass leaked"))
-                           ((pair? ((sub 'GET-CLASS) 'GET-CLASS)) (fail "Representation of metaclass leaked"))
-                           ((pair? obj) (fail "Representation of object leaked")))
-                     (verify-result "Method invocation failed." (obj 'METHOD2) 12)
-                     (verify-result "Method invocation failed." (obj 'METHOD3) 17))))
+; (define test-problem6-oo-eval
+;     (make-oo-eval-test "Problem 6: abstraction opacity in oo-eval [optional] LAST TEST"
+;                    '((define base (make-class 'BASE #f () ((METHOD1 (lambda () 5)) (METHOD2 (lambda () 6)))))
+;                      (define sub  (make-class 'SUB  base () ((METHOD3 (lambda () (+ (self 'METHOD2) (self 'METHOD1)))) (METHOD2 (lambda () (* 2 (super 'METHOD2)))))))
+;                      (define obj (new sub))
+;                      (cond ((pair? base) (fail "Representation of class leaked"))
+;                            ((pair? sub)  (fail "Representation of sub class leaked"))
+;                            ((pair? (sub 'GET-CLASS)) (fail "Representation of metaclass leaked"))
+;                            ((pair? ((sub 'GET-CLASS) 'GET-CLASS)) (fail "Representation of metaclass leaked"))
+;                            ((pair? obj) (fail "Representation of object leaked")))
+;                      (verify-result "Method invocation failed." (obj 'METHOD2) 12)
+;                      (verify-result "Method invocation failed." (obj 'METHOD3) 17))))
 
+
+
+(define test-mixin-abstraction
+  (make-oo-eval-test 
+    "Problem 10: make-mixin and supporting methods"
+    '((run-file "oo-util.scm")
+      (define mixin (make-mixin 'NAME-CHANGER 
+                                (list
+                                  (list 'CHANGE-NAME!
+                                        (lambda (n) (set! :name n))))))
+      (verify-result "mixin?" (mixin? mixin) #t)
+      (verify-result "not mixin?" (mixin? 1) #f)
+      (verify-result "mixin-name" (mixin-name mixin) 'NAME-CHANGER)
+      (verify-result "mixin-methods" (mixin-methods mixin) (list (list 'CHANGE-NAME! 
+                                                                       (lambda (n) (set! :name n))))))))
+(define test-set-class
+  (make-oo-eval-test
+    "Problem 10: SET-CLASS!"
+    '((run-file "oo-util.scm")
+      ; root-class from oo-util
+      (define named-object (make-class 'NAMED-OBJECT root-class (name) ((CONSTRUCTOR (lambda (_name) (set! name _name))) (NAME (lambda () name)))))
+      (define sicp (new named-object 'SICP!))
+      (verify-result "class name correct" (sicp 'GET-CLASS) named-object)
+      (sicp 'SET-CLASS! root-object)
+      (verify-result "class name correct" (sicp 'GET-CLASS) root-object)
+      #f)))
+
+(define test-add-mixin
+  (make-oo-eval-test 
+    "Problem 10: ADD-METHOD!"
+    '((run-file "oo-util.scm")
+      ; from oo-types
+      (define named-object
+        (make-class
+          'NAMED-OBJECT
+          root-class
+          (:name)
+          ((CONSTRUCTOR
+             (lambda (name)
+               (set! :name name)
+               'installed))
+           (NAME     (lambda () :name))
+           (DESTROY  (lambda () 'destroyed)))))
+      (named-object 'ADD-METHOD!
+        'CHANGE-NAME!
+        (lambda (n) (set! :name n)))
+      (define book (new named-object 'sicp))
+      (verify-result "book name" (book 'NAME) 'sicp)
+      (book 'CHANGE-NAME! 'way-of-kings)
+      (verify-result "book name" (book 'NAME) 'way-of-kings))))
+
+(define test-add-mixin
+  (make-oo-eval-test 
+    "Problem 10: testing add mixin"
+    '((run-file "oo-util.scm")
+      (define named-object
+        (make-class
+          'NAMED-OBJECT
+          root-class
+          (:name)
+          ((CONSTRUCTOR
+             (lambda (name)
+               (set! :name name)
+               'installed))
+           (NAME     (lambda () :name))
+           (DESTROY  (lambda () 'destroyed)))))
+      (define name-changer
+        (make-mixin 
+          'NAME-CHANGER 
+          (list
+            (list 'CHANGE-NAME!
+                  (lambda (n) (set! :name n))))))
+      
+      (define book (new named-object 'sicp))
+      (verify-result "book name" (book 'NAME) 'sicp)
+      (verify-result "is-a" ((is-a 'NAMED-OBJECT) book) #t)
+      (verify-result "is-a" ((is-a 'NAME-CHANGER) book) #f)
+      
+      (instance-add-mixin! book name-changer)
+      (book 'CHANGE-NAME! 'way-of-kings)
+      (verify-result "book name" (book 'NAME) 'way-of-kings)
+      (verify-result "is-a" ((is-a 'NAME-CHANGER) book) #t))))
