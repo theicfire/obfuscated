@@ -347,7 +347,9 @@
           'NAME-CHANGER 
           (list
             (list 'CHANGE-NAME!
-                  (lambda (n) (set! :name n))))))
+                  (lambda (n) (set! :name n)))
+            (list 'DESTROY
+                  (lambda () 'neva)))))
       
       (define book (new named-object 'sicp))
       (verify-result "book name" (book 'NAME) 'sicp)
@@ -357,4 +359,5 @@
       (instance-add-mixin! book name-changer)
       (book 'CHANGE-NAME! 'way-of-kings)
       (verify-result "book name" (book 'NAME) 'way-of-kings)
+      (verify-result "destroy overwritten" (book 'DESTROY) 'neva)
       (verify-result "is-a" ((is-a 'NAME-CHANGER) book) #t))))

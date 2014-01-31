@@ -204,7 +204,7 @@
   (set! all-places (create-world))
 
   (scatter-people (create-students) all-places)
-  (new zombie 'george (pick-random all-places) 5)
+  (create-zombie (pick-random (all-people)))
 
   (create-stuff all-places)
   (create-weapons all-places)

@@ -212,5 +212,7 @@
 
 (define (add-methods class methods)
   (if (not (null? methods))
-      (class 'ADD-METHOD! (first (first methods)) (second (first methods)))
-      (add-methods class (cdr methods))))
+      (begin
+        (class 'ADD-METHOD! (first (first methods)) (second (first methods)))
+        (add-methods class (cdr methods)))
+      #f))

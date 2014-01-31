@@ -302,51 +302,48 @@
        (super 'DIE perp)))
     )))
 
-(define zombie
-  (make-class
-   'ZOMBIE
-   autonomous-person
-   ()
-   ((CONSTRUCTOR
-     (lambda (name location rest)
-       (super 'CONSTRUCTOR name location rest 0)
-       (self 'SAY (list "uuuuUUUUuuuuh.. brains..."))))
-    (NAME
-     (lambda ()
-       (symbol-append 'zombie-of- :name)))
-    (ACT
-     (lambda ()
-       (super 'ACT)
-       (self 'AUTO-BITE)))
-    (AUTO-BITE
-     (lambda ()
-       (if (= (random 2) 0)
-           (self 'BITE-SOMEONE)
-           'not-a-biting-mood)))
-    (BITE-SOMEONE
-     (lambda ()
-       (let ((victim (pick-random
-                      (filter (lambda (x) (and ((is-a 'AUTONOMOUS-PERSON) x)
-                                               (not ((is-a 'ZOMBIE) x))))
-                              (self 'PEOPLE-AROUND)))))
-         (if victim
-             (if (= (random 2) 0)
-                 (begin
-                   (self 'EMIT (list (self 'NAME) "bites"
-                                     (victim 'NAME)))
-                   (create-zombie self victim
-                                  :restlessness))
-                 (self 'EMIT (list (self 'NAME) "bites at"
-                                   (victim 'NAME) "but misses")))
-             'nobody-to-bite))))
-    )))
 
-(define (create-zombie perp victim rest)
-  (let ((vic-name (victim 'NAME))
-        (vic-loc (victim 'LOCATION)))
-    (victim 'DIE perp)                    ;; ditch old instance
-    (new zombie vic-name vic-loc rest) ;; build new instance w/ subclass
-    'converted))
+(define zombie-mixin
+  (make-mixin 
+    'ZOMBIE-MIXIN
+    (list
+      (list 'BECOME-ZOMBIE
+       (lambda ()
+          (self 'SAY (list "oooouuuuUUUUuuuuh.. brains..."))
+          (set! :miserly 0)))
+      (list 'NAME
+       (lambda ()
+         (symbol-append 'zombie-of- :name)))
+      (list 'ACT
+       (lambda ()
+         (super 'ACT)
+         (self 'AUTO-BITE)))
+      (list 'AUTO-BITE
+       (lambda ()
+         (if (= (random 2) 0)
+             (self 'BITE-SOMEONE)
+             'not-a-biting-mood)))
+      (list 'BITE-SOMEONE
+       (lambda ()
+         (let ((victim (pick-random
+                        (filter (lambda (x) (and ((is-a 'AUTONOMOUS-PERSON) x)
+                                                 (not ((is-a 'ZOMBIE) x))))
+                                (self 'PEOPLE-AROUND)))))
+           (if victim
+               (if (= (random 2) 0)
+                   (begin
+                     (self 'EMIT (list (self 'NAME) "bites"
+                                       (victim 'NAME)))
+                     (create-zombie victim))
+                   (self 'EMIT (list (self 'NAME) "bites at"
+                                     (victim 'NAME) "but misses")))
+               'nobody-to-bite)))))))
+
+
+(define (create-zombie victim)
+    (instance-add-mixin! victim zombie-mixin)
+    (victim 'BECOME-ZOMBIE)
+    'converted)
 
 (define avatar
   (make-class

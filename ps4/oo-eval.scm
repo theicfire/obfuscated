@@ -749,10 +749,10 @@
 (include "alyssa-tests.scm")
 
 ;; Run all the tests
-(run-all-tests)
+; (run-all-tests)
 
 ;; If desired, uncomment to start up the evaluator REPL when you run this file
 ;(driver-loop)
 
 ;; Or to start the game:
-;(run-game 'your-name)
+(run-game 'me)
